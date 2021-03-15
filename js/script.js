@@ -1,13 +1,14 @@
 'use strict';
 
 class Todo {
-    constructor(form, input, todoList, todoCompleted, btnDelete, todoButtons){
+    constructor(form, input, todoList, todoCompleted, btnDelete, todoButtons, todoContainer){
         this.form = document.querySelector(form);
         this.input = document.querySelector(input);
         this.todoList = document.querySelector(todoList);
         this.todoCompleted = document.querySelector(todoCompleted);
         this.todoButtons = document.querySelector(todoButtons);
-        this.btnDelete = todoButtons.querySelectorAll(btnDelete);
+        this.btnDelete = document.querySelector(btnDelete);
+        this.todoContainer = document.querySelector(todoContainer);
         this.todoData = new Map(JSON.parse(localStorage.getItem('todoList')));
     }
 
@@ -17,6 +18,7 @@ class Todo {
 
     render(){
         this.todoList.textContent = '';
+        this.input.value = '';
         this.todoCompleted.textContent = '';
         this.todoData.forEach(this.createItem, this);
         this.addToStorage();
@@ -57,45 +59,40 @@ class Todo {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
 
-    deleteItem(e){
-        let target = e.target;
-        console.log(target);
+    deleteItem(target){
+        this.todoData.forEach((elem, index) => {
+            if (target === elem.value){
+                this.todoData.delete(index);
+                this.render();
+            }
+        });
     }
 
-    completedItem(){
-        
+    completedItem(target){
+        this.todoData.forEach((elem, index) => {
+            elem.completed === true ? elem.completed = false : elem.completed = true;
+            this.render();
+        });
     }
 
     handler(){
-
+        this.todoContainer.addEventListener('click', elem => {
+            let target = elem.target;
+            if(target.classList.contains('todo-remove')){
+                this.deleteItem(elem.path[2].textContent.trim());
+            }   else if (target.classList.contains('todo-complete')){
+                this.completedItem(elem.path[2].textContent.trim());
+            }
+        });
     }
 
     init (){
         this.form.addEventListener('submit', this.addTodo.bind(this));
         this.render();
     }
-
-    eventListeners(){
-        console.log(this.btnDelete);
-        console.log(this.todoList);
-        console.log(this.todoButtons);
-        this.btnDelete.forEach(elem => {
-            elem.addEventListener('click', () =>{
-                console.log(1);
-            });
-        });
-        this.todoButtons.addEventListener('click', event => {
-            console.log(1);
-            let target = event.target;
-            if (target.classList.contains('todo-remove')){
-                console.log(1);
-                this.deleteItem();
-            }
-        });
-    }
 }
 
 const todo = new Todo('.todo-control', '.header-input', '.todo-list', '.todo-completed', '.todo-remove', 
-'.todo-buttons');
+'.todo-buttons', '.todo-container');
 todo.init();
-todo.eventListeners();
+todo.handler();
