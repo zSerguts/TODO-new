@@ -69,8 +69,10 @@ class Todo {
     }
 
     completedItem(target){
-        this.todoData.forEach((elem, index) => {
-            elem.completed === true ? elem.completed = false : elem.completed = true;
+        this.todoData.forEach((elem) => {
+            if (target === elem.value){
+                elem.completed === true ? elem.completed = false : elem.completed = true;
+            }
             this.render();
         });
     }
